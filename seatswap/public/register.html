@@ -485,27 +485,30 @@ document.getElementById('theForm').addEventListener('submit', async (e) => {
       };
     });
 
-    const row = {
-      show_date: showDate,
-      source_type: cfg.sourceType,
-      current_category: category,
-      current_zone: zone,
-      current_price: price,
-      current_row: document.getElementById('myRow').value.trim() || null,
-      current_seat: document.getElementById('mySeat').value.trim() || null,
-      intent_zones: intentZones,
-      max_accept_price: maxPriceSel.value ? parseInt(maxPriceSel.value) : null,
-      same_level_ok: !!window._sameLevelOk,
-      same_level_amount: window._sameLevelOk ? (parseInt(document.getElementById('sameLevelValue')?.value) || null) : null,
-      ticket_image_url: ticketImageUrl,
-      weibo_id: weiboId, weibo_link: weiboLink, xhs_id: xhsId, dy_id: dyId,
-      wechat_id: wechatId, phone: phoneNum,
-    };
+   const editToken = crypto.randomUUID();
 
-    const { data, error } = await sb.from('submissions').insert(row).select('edit_token').single();
-    if(error) throw error;
+const row = {
+  show_date: showDate,
+  source_type: cfg.sourceType,
+  current_category: category,
+  current_zone: zone,
+  current_price: price,
+  current_row: document.getElementById('myRow').value.trim() || null,
+  current_seat: document.getElementById('mySeat').value.trim() || null,
+  intent_zones: intentZones,
+  max_accept_price: maxPriceSel.value ? parseInt(maxPriceSel.value) : null,
+  same_level_ok: !!window._sameLevelOk,
+  same_level_amount: window._sameLevelOk ? (parseInt(document.getElementById('sameLevelValue')?.value) || null) : null,
+  ticket_image_url: ticketImageUrl,
+  weibo_id: weiboId, weibo_link: weiboLink, xhs_id: xhsId, dy_id: dyId,
+  wechat_id: wechatId, phone: phoneNum,
+  edit_token: editToken
+};
 
-    const link = `${location.origin}${location.pathname.replace('register.html','edit.html')}?token=${data.edit_token}`;
+const { error } = await sb.from('submissions').insert(row);
+if(error) throw error;
+
+const link = `${location.origin}${location.pathname.replace('register.html','edit.html')}?token=${editToken}`;
     document.getElementById('magicLink').textContent = link;
     document.getElementById('theForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
