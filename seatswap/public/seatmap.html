@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>座位地图</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  .stage{ padding: 16px 18px 24px; display:flex; flex-direction:column; gap:14px; }
+  .cat-tabs{ display:flex; gap:8px; }
+  .cat-tab{ flex:1; text-align:center; padding:10px 4px; border-radius:12px; border:1.5px solid var(--line); background:#fff; font-size:12.5px; font-weight:800; color:var(--ink-soft); cursor:pointer; }
+  .cat-tab.active{ background:var(--pink-deep); border-color:var(--pink-deep); color:#fff; }
+
+  .legend{ display:flex; align-items:center; gap:14px; font-size:11px; color:var(--ink-soft); }
+  .legend .dot{ display:inline-block; width:12px; height:12px; border-radius:4px; margin-right:5px; vertical-align:-2px; }
+  .legend .dot.lit{ background:var(--pink-deep); }
+  .legend .dot.empty{ background:#f3e3ea; }
+
+  .grid-scroll{ overflow:auto; border:1.5px solid var(--line); border-radius:14px; padding:10px; -webkit-overflow-scrolling:touch; max-height:60vh; }
+  .seat-grid{ display:inline-block; }
+  .seat-row{ display:flex; align-items:center; gap:3px; margin-bottom:3px; }
+  .seat-row-label{ width:44px; flex-shrink:0; font-size:10px; color:var(--ink-soft); font-weight:700; text-align:right; padding-right:4px; }
+  .seat-cell{ width:16px; height:16px; flex-shrink:0; border-radius:4px; background:#f3e3ea; cursor:pointer; }
+  .seat-cell.lit{ background:var(--pink-deep); cursor:default; }
+  .seat-cell:hover:not(.lit){ background:#ffd6e4; }
+
+  .stat-bar{ font-size:11px; color:var(--ink-soft); text-align:center; }
+  .stat-bar b{ color:var(--pink-deep); }
+  .back-link{ display:block; text-align:center; padding:14px; font-size:12px; color:var(--ink-soft); text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="top">
+    <div class="top-row"><div class="brand">Seat Map</div><div class="watermark">YBW_Sgz</div></div>
+    <h1>座位地图</h1>
+    <div class="sub" id="pageSub">看看强攻/主攻区现在坐了多少人</div>
+  </header>
+
+  <div id="pwGate" class="stage" style="text-align:center; padding-top:36px;">
+    <p style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;">请输入座位地图口令</p>
+    <input type="password" id="pwInput" placeholder="输入口令" style="margin-bottom:12px;">
+    <button class="btn-primary" onclick="submitPassword()">进入</button>
+    <div id="pwError" class="warn-box" style="display:none; margin-top:12px;"></div>
+  </div>
+
+  <div id="mainStage" class="stage" style="display:none;">
+    <a class="btn-primary" style="text-decoration:none; display:block; text-align:center;" href="seatmap-register.html">✏️ 登记我的座位</a>
+
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="field">
+      <label>选择分区</label>
+      <select id="zoneSel" onchange="loadGrid()"></select>
+    </div>
+
+    <div class="legend">
+      <span><span class="dot lit"></span>已登记</span>
+      <span><span class="dot empty"></span>还没人</span>
+    </div>
+    <div class="stat-bar">这个区已登记 <b id="litCount">0</b> 个座位</div>
+
+    <div class="grid-scroll"><div id="seatGrid" class="seat-grid"></div></div>
+  </div>
+
+  <a class="back-link" href="index.html">← 返回首页</a>
+</div>
+
+<script src="js/seatmap-zones.js"></script>
+<script>
+let password = sessionStorage.getItem('seatmap_pw') || null;
+let activeCat = SEATMAP_CATEGORIES[0].name;
+let litSet = new Set(); // "row-seat" 格式
+
+function init(){
+  document.getElementById('catTabs').innerHTML = SEATMAP_CATEGORIES.map(c => `
+    <div class="cat-tab ${c.name===activeCat?'active':''}" onclick="switchCat('${c.name}')">${c.name}</div>
+  `).join('');
+
+  if(password){
+    showMainStage();
+  } else {
+    document.getElementById('pwGate').style.display = 'block';
+  }
+}
+
+async function submitPassword(){
+  const pw = document.getElementById('pwInput').value;
+  const errBox = document.getElementById('pwError');
+  errBox.style.display = 'none';
+  if(!pw) return;
+  try {
+    const res = await fetch('/.netlify/functions/seatmap-grid', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ password: pw }),
+    });
+    if(res.status === 401){
+      errBox.textContent = '⚠ 口令不对,请再试一次';
+      errBox.style.display = 'block';
+      return;
+    }
+    if(!res.ok) throw new Error('网络错误');
+    password = pw;
+    sessionStorage.setItem('seatmap_pw', pw);
+    showMainStage();
+  } catch(err){
+    errBox.textContent = '⚠ ' + err.message;
+    errBox.style.display = 'block';
+  }
+}
+
+function showMainStage(){
+  document.getElementById('pwGate').style.display = 'none';
+  document.getElementById('mainStage').style.display = 'flex';
+  populateZoneSelect();
+  loadGrid();
+}
+
+function switchCat(name){
+  activeCat = name;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.textContent === name));
+  populateZoneSelect();
+  loadGrid();
+}
+
+function populateZoneSelect(){
+  const cat = SEATMAP_CATEGORIES.find(c => c.name === activeCat);
+  const sel = document.getElementById('zoneSel');
+  sel.innerHTML = cat.zones.map(z => `<option value="${z}">${z}</option>`).join('');
+}
+
+async function loadGrid(){
+  const zone = document.getElementById('zoneSel').value;
+  if(!zone) return;
+
+  const res = await fetch('/.netlify/functions/seatmap-grid', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ password, category: activeCat, zone }),
+  });
+  if(res.status === 401){
+    sessionStorage.removeItem('seatmap_pw');
+    password = null;
+    document.getElementById('pwGate').style.display = 'block';
+    document.getElementById('mainStage').style.display = 'none';
+    return;
+  }
+  const json = await res.json();
+  litSet = new Set((json.data || []).map(d => `${d.row_number}-${d.seat_number}`));
+  document.getElementById('litCount').textContent = litSet.size;
+
+  renderGrid(zone);
+}
+
+function renderGrid(zoneName){
+  const [start, end] = window.getSeatmapRowRange(zoneName);
+  const grid = document.getElementById('seatGrid');
+  let html = '';
+  for(let r = start; r <= end; r++){
+    html += `<div class="seat-row"><div class="seat-row-label">第${r}排</div>`;
+    for(let s = 1; s <= SEATMAP_COLS_PER_ROW; s++){
+      const lit = litSet.has(`${r}-${s}`);
+      html += `<div class="seat-cell ${lit?'lit':''}" data-row="${r}" data-seat="${s}" data-lit="${lit}"></div>`;
+    }
+    html += `</div>`;
+  }
+  grid.innerHTML = html;
+}
+
+document.getElementById('seatGrid').addEventListener('click', (e) => {
+  const cell = e.target.closest('.seat-cell');
+  if(!cell || cell.dataset.lit === 'true') return;
+  const zone = document.getElementById('zoneSel').value;
+  const params = new URLSearchParams({ category: activeCat, zone, row: cell.dataset.row, seat: cell.dataset.seat });
+  location.href = `seatmap-register.html?${params.toString()}`;
+});
+
+init();
+</script>
+</body>
+</html>
