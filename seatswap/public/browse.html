@@ -285,6 +285,8 @@ function renderCard(r){
           <div><b>链接</b>${escapeHtml(r.weibo_link)}</div>
           <div><b>小红书</b>${escapeHtml(r.xhs_id)}</div>
           <div><b>抖音</b>${escapeHtml(r.dy_id)}</div>
+          <div><b>微信</b>${escapeHtml(r.wechat_id)}</div>
+          <div><b>手机</b>${escapeHtml(r.phone)}</div>
         </div>
         <div class="flag-link" onclick="flagAsMatched('${r.id}')">这个人已经换过票了?点这里告诉我们</div>
       </div>`;
