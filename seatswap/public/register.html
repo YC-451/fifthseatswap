@@ -508,7 +508,7 @@ const row = {
 const { error } = await sb.from('submissions').insert(row);
 if(error) throw error;
 
-const link = `${location.origin}${location.pathname.replace('register.html','edit.html')}?token=${editToken}`;
+const link = `${location.origin}/edit.html?token=${editToken}`;
     document.getElementById('magicLink').textContent = link;
     document.getElementById('theForm').style.display = 'none';
     document.getElementById('successScreen').classList.add('show');
