@@ -453,9 +453,12 @@ document.getElementById('theForm').addEventListener('submit', async (e) => {
   if(!weiboId || !weiboLink || !xhsId || !dyId || !wechatId || !phoneNum) return showError('联系方式六项都要填,没有请填 /');
 
   const rowNum = extractRowNumber(document.getElementById('myRow').value);
-  if(rowNum !== null && BACK_WALL_ROWS.includes(rowNum)){
-    const goOn = confirm(`💡 你填的第${rowNum}排是"后墙排",建议换票时尽量平换到同样是后墙排的位置。\n\n点"确定"继续提交,点"取消"回去改。`);
-    if(!goOn) return;
+  if(entry === 1 && rowNum !== null){
+    const msg = rowWarningMessage(rowNum);
+    if(msg){
+      const goOn = confirm(`${msg}\n\n点"确定"继续提交,点"取消"回去改。`);
+      if(!goOn) return;
+    }
   }
 
   const submitBtn = document.getElementById('submitBtn');
@@ -526,20 +529,35 @@ document.getElementById('theForm').addEventListener('submit', async (e) => {
   }
 });
 
-// 后墙排:这几排视野被后墙挡住,提醒用户尽量平换到同样是后墙排的位置
-const BACK_WALL_ROWS = [16, 19, 27, 32, 42, 71];
+// 后墙排 / 栏杆排:视野会被挡住,提醒用户尽量平换到同类型的位置
+const BACK_WALL_ROWS = [16, 19, 27, 32, 42]; // 70排及以上也算后墙排,用 isBackWallRow() 判断
+const RAILING_ROWS = [1, 2, 20, 21, 34, 44];
 
-// 从"排数"文本框里提取数字(比如"16排"、"第16排"、"16"都能识别出16),判断是不是后墙排
+function isBackWallRow(rowNum){
+  return BACK_WALL_ROWS.includes(rowNum) || rowNum >= 70;
+}
+function isRailingRow(rowNum){
+  return RAILING_ROWS.includes(rowNum);
+}
+
+// 从"排数"文本框里提取数字(比如"16排"、"第16排"、"16"都能识别出16)
 function extractRowNumber(text){
   const match = (text || '').match(/\d+/);
   return match ? parseInt(match[0]) : null;
 }
 
+function rowWarningMessage(rowNum){
+  if(isRailingRow(rowNum)) return `💡 第${rowNum}排是"栏杆排",建议换票时尽量平换到同样是栏杆排的位置`;
+  if(isBackWallRow(rowNum)) return `💡 第${rowNum}排是"后墙排",建议换票时尽量平换到同样是后墙排的位置`;
+  return null;
+}
+
 function checkBackWallRow(){
+  if(entry !== 1) return; // 只有入口一(博文家)需要这个提醒
   const rowNum = extractRowNumber(document.getElementById('myRow').value);
-  if(rowNum !== null && BACK_WALL_ROWS.includes(rowNum)){
-    alert(`💡 第${rowNum}排是"后墙排",建议换票时尽量平换到同样是后墙排的位置`);
-  }
+  if(rowNum === null) return;
+  const msg = rowWarningMessage(rowNum);
+  if(msg) alert(msg);
 }
 
 function copyLink(){
