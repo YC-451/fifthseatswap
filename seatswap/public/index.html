@@ -9,6 +9,9 @@
 <link rel="stylesheet" href="css/theme.css">
 <style>
   .portals{ padding: 24px 22px 30px; display:flex; flex-direction:column; gap:16px; }
+  .entry-group{ display:flex; flex-direction:column; gap:12px; }
+  .entry-group + .entry-group{ margin-top:22px; padding-top:22px; border-top:1.5px dashed var(--line); }
+  .group-label{ font-size:11px; font-weight:800; color:var(--ink-soft); letter-spacing:.04em; }
   .portal-card{
     border: 1.5px solid var(--line); border-radius: 20px; padding: 20px; cursor:pointer;
     text-decoration:none; color:inherit; display:block;
@@ -19,16 +22,6 @@
   .badge{ display:inline-block; font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:999px; margin-bottom:8px; }
   .badge.pw{ background:var(--pink-deep); color:#fff; }
   .badge.open{ background:#e9f8ef; color:var(--green); }
-  .center-link{ text-align:center; display:block; margin-top:6px; font-size:12px; color:var(--ink-soft); text-decoration:none; }
-  .reg-btn{
-    display:block; text-align:center; text-decoration:none;
-    background: linear-gradient(135deg, var(--pink-mid), var(--pink-deep)); color:#fff;
-    font-weight:800; font-size:13.5px; padding:14px 12px; border-radius:16px;
-    box-shadow: var(--shadow); margin-top:4px;
-  }
-  .reg-btn.secondary{
-    background:#fff; color: var(--pink-deep); border:1.5px solid var(--pink-deep); box-shadow:none;
-  }
 </style>
 </head>
 <body>
@@ -43,18 +36,28 @@
   </header>
 
   <div class="portals">
-    <a class="portal-card internal" href="register.html?entry=1">
-      <span class="badge pw">需要口令</span>
-      <h3>博文家专属入口</h3>
-      <p>先登记我的非主攻换座信息,登记成功后就能去浏览、匹配候选人。</p>
-    </a>
+    <div class="entry-group">
+      <div class="group-label">博文家</div>
+      <a class="portal-card internal" href="register.html?entry=1">
+        <span class="badge pw">需要口令</span>
+        <h3>博文家专属入口</h3>
+        <p>先登记我的非主攻换座信息,登记成功后就能去浏览、匹配候选人。</p>
+      </a>
+    </div>
 
-    <a class="portal-card" href="browse.html?mode=public" style="margin-top:6px;">
-      <span class="badge open">任何人都能用</span>
-      <h3>对外查询</h3>
-      <p>查看博文家粉丝在非主攻区、愿意换出的票信息。不需要口令,谁都能看。</p>
-    </a>
-    <a class="reg-btn secondary" href="register.html?entry=2">✏️ 登记"主攻/强攻想换到非主攻"的票信息(不需要口令)</a>
+    <div class="entry-group">
+      <div class="group-label">给别的粉丝群体用</div>
+      <a class="portal-card" href="browse.html?mode=public">
+        <span class="badge open">任何人都能用</span>
+        <h3>对外查询</h3>
+        <p>查看博文家粉丝在非主攻区、愿意换出的票信息。不需要口令,谁都能看。</p>
+      </a>
+      <a class="portal-card" href="register.html?entry=2">
+        <span class="badge open">任何人都能用</span>
+        <h3>登记我的换座信息</h3>
+        <p>当前在主攻/强攻区,想换到非主攻区。不需要口令,直接可以填。</p>
+      </a>
+    </div>
   </div>
 </div>
 </body>
