@@ -4,7 +4,7 @@ window.CATEGORY_DATA = [
     {name:'VIP2区',price:1680}, {name:'VIP5区',price:1680}, {name:'VIP6区',price:1680},
     {name:'A3区',price:1480}, {name:'A4区',price:1480},
     {name:'二层西A3区',price:980}, {name:'二层西03区',price:980},
-    {name:'二层西02区',price:680}, {name:'二层西01区',price:680}, {name:'二层北32区',price:680},
+    {name:'二层西02区',price:680}, {name:'二层西01区',price:980}, {name:'二层北32区',price:680},
     {name:'四层西A3区',price:980}, {name:'四层西03区',price:980},
     {name:'四层西02区',price:680}, {name:'四层西01区',price:680}, {name:'四层北32区',price:480},
   ]},
