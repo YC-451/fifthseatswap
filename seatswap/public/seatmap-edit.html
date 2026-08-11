@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>管理我的座位登记</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .stage{ padding: 20px 20px 30px; }
+  .info-card{ background:#fff8fa; border:1.5px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
+  .info-row{ display:flex; justify-content:space-between; padding:7px 0; font-size:13px; border-bottom:1px dashed var(--line); }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row b{ color:var(--ink-soft); font-weight:700; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="top">
+    <div class="top-row"><div class="brand">Seat Map</div><div class="watermark">YBW_Sgz</div></div>
+    <h1>管理我的登记</h1>
+    <div class="sub">通过专属链接查看和撤销</div>
+  </header>
+  <div class="stage" id="stage"><div class="loading">加载中...</div></div>
+</div>
+
+<script src="js/supabase-config.js"></script>
+<script>
+const sb = window.getSupabaseClient();
+const token = new URLSearchParams(location.search).get('token');
+const stage = document.getElementById('stage');
+
+async function load(){
+  if(!token){ stage.innerHTML = '<div class="loading">链接不对,缺少管理令牌</div>'; return; }
+  const { data, error } = await sb.rpc('get_seatmap_entry_by_token', { p_edit_token: token });
+  if(error || !data || data.length === 0){
+    stage.innerHTML = '<div class="loading">找不到这条登记,可能已经被撤销了</div>';
+    return;
+  }
+  render(data[0]);
+}
+
+function render(r){
+  stage.innerHTML = `
+    <div class="info-card">
+      <div class="info-row"><span><b>分类</b></span><span>${r.category}</span></div>
+      <div class="info-row"><span><b>分区</b></span><span>${r.zone}</span></div>
+      <div class="info-row"><span><b>座位</b></span><span>第${r.row_number}排 ${r.seat_number}号</span></div>
+      <div class="info-row"><span><b>微博</b></span><span>${r.weibo_id}</span></div>
+      <div class="info-row"><span><b>微博链接</b></span><span style="text-align:right;max-width:60%;word-break:break-all;">${r.weibo_link}</span></div>
+      <div class="info-row"><span><b>微信</b></span><span>${r.wechat_id}</span></div>
+      <div class="info-row"><span><b>手机</b></span><span>${r.phone}</span></div>
+    </div>
+    <button class="btn-primary" onclick="removeEntry()">✕ 撤销这条登记</button>
+  `;
+}
+
+async function removeEntry(){
+  if(!confirm('确认撤销这条登记吗?撤销后座位会从地图上消失,这个操作不能撤回。')) return;
+  const { error } = await sb.rpc('delete_seatmap_entry', { p_edit_token: token });
+  if(error){ alert('操作失败:' + error.message); return; }
+  stage.innerHTML = '<div class="loading">已撤销这条登记</div>';
+}
+
+load();
+</script>
+</body>
+</html>
