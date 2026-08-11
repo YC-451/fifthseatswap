@@ -98,7 +98,7 @@
         <option value="">请先选票价</option>
       </select>
       <div class="grid2">
-        <div><label>排数</label><input type="text" id="myRow" placeholder="例如 5排"></div>
+        <div><label>排数</label><input type="text" id="myRow" placeholder="例如 5排" onblur="checkBackWallRow()"></div>
         <div><label>座位号</label><input type="text" id="mySeat" placeholder="例如 12号"></div>
       </div>
     </div>
@@ -452,6 +452,12 @@ document.getElementById('theForm').addEventListener('submit', async (e) => {
   if(!category || !price || !zone) return showError('请填完整"我的当前座位"');
   if(!weiboId || !weiboLink || !xhsId || !dyId || !wechatId || !phoneNum) return showError('联系方式六项都要填,没有请填 /');
 
+  const rowNum = extractRowNumber(document.getElementById('myRow').value);
+  if(rowNum !== null && BACK_WALL_ROWS.includes(rowNum)){
+    const goOn = confirm(`💡 你填的第${rowNum}排是"后墙排",建议换票时尽量平换到同样是后墙排的位置。\n\n点"确定"继续提交,点"取消"回去改。`);
+    if(!goOn) return;
+  }
+
   const submitBtn = document.getElementById('submitBtn');
   submitBtn.disabled = true;
   submitBtn.textContent = '提交中...';
@@ -519,6 +525,22 @@ document.getElementById('theForm').addEventListener('submit', async (e) => {
     submitBtn.textContent = '提交换座信息';
   }
 });
+
+// 后墙排:这几排视野被后墙挡住,提醒用户尽量平换到同样是后墙排的位置
+const BACK_WALL_ROWS = [16, 19, 27, 32, 42, 71];
+
+// 从"排数"文本框里提取数字(比如"16排"、"第16排"、"16"都能识别出16),判断是不是后墙排
+function extractRowNumber(text){
+  const match = (text || '').match(/\d+/);
+  return match ? parseInt(match[0]) : null;
+}
+
+function checkBackWallRow(){
+  const rowNum = extractRowNumber(document.getElementById('myRow').value);
+  if(rowNum !== null && BACK_WALL_ROWS.includes(rowNum)){
+    alert(`💡 第${rowNum}排是"后墙排",建议换票时尽量平换到同样是后墙排的位置`);
+  }
+}
 
 function copyLink(){
   const text = document.getElementById('magicLink').textContent;
