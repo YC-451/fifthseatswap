@@ -72,6 +72,8 @@ function render(r){
       <div class="info-row"><span><b>排数/座位</b></span><span>${r.current_row || '-'} / ${r.current_seat || '-'}</span></div>
       <div class="info-row"><span><b>意向分区</b></span><span style="text-align:right;max-width:60%;">${intent}</span></div>
       <div class="info-row"><span><b>微博</b></span><span>${r.weibo_id}</span></div>
+      <div class="info-row"><span><b>微信</b></span><span>${r.wechat_id}</span></div>
+      <div class="info-row"><span><b>手机</b></span><span>${r.phone}</span></div>
     </div>
 
     ${r.status === 'active' ? `
