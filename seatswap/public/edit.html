@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>管理我的换座信息</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/theme.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  .stage{ padding: 20px 20px 30px; }
+  .info-card{ background:#fff8fa; border:1.5px solid var(--line); border-radius:16px; padding:16px; margin-bottom:16px; }
+  .info-row{ display:flex; justify-content:space-between; padding:7px 0; font-size:13px; border-bottom:1px dashed var(--line); }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row b{ color:var(--ink-soft); font-weight:700; }
+  .status-badge{ display:inline-block; font-size:11px; font-weight:800; padding:4px 10px; border-radius:999px; }
+  .status-active{ background:#e9f8ef; color:var(--green); }
+  .status-matched{ background:#f1e4e8; color:var(--ink); }
+  .flag-notice{ background:#fff3f7; border:1.5px solid var(--pink-pale); border-radius:14px; padding:14px; margin-bottom:16px; font-size:12.5px; line-height:1.6; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <header class="top">
+    <div class="top-row"><div class="brand">Seat Swap</div><div class="watermark">YBW_Sgz</div></div>
+    <h1>管理我的信息</h1>
+    <div class="sub">通过专属链接查看和管理</div>
+  </header>
+  <div class="stage" id="stage">
+    <div class="loading">加载中...</div>
+  </div>
+</div>
+
+<script src="js/supabase-config.js"></script>
+<script>
+const sb = window.getSupabaseClient();
+const token = new URLSearchParams(location.search).get('token');
+const stage = document.getElementById('stage');
+
+async function load(){
+  if(!token){
+    stage.innerHTML = '<div class="loading">链接不对,缺少管理令牌</div>';
+    return;
+  }
+  const { data, error } = await sb.rpc('get_submission_by_token', { p_edit_token: token });
+  if(error || !data || data.length === 0){
+    stage.innerHTML = '<div class="loading">找不到对应的信息,链接可能有误</div>';
+    return;
+  }
+  render(data[0]);
+}
+
+function render(r){
+  const wasAutoFlagged = r.status === 'matched';
+  const intent = (r.intent_zones || []).map(z => z.zone + (z.row_limited ? `(${z.row_pref})` : '')).join('、') || '未填';
+
+  let html = '';
+  if(wasAutoFlagged){
+    html += `
+      <div class="flag-notice">
+        📌 这条信息目前状态是「已完成」。可能是你自己标记的,也可能是有两位联系过你的人反馈"已经换过票了"。<br>
+        如果这是误判,可以点下面按钮重新上架。
+      </div>`;
+  }
+
+  html += `
+    <div class="info-card">
+      <div class="info-row"><span><b>状态</b></span><span class="status-badge ${r.status === 'active' ? 'status-active':'status-matched'}">${r.status === 'active' ? '在池子里' : '已完成 / 已下架'}</span></div>
+      <div class="info-row"><span><b>场次</b></span><span>${r.show_date}</span></div>
+      <div class="info-row"><span><b>当前座位</b></span><span>${r.current_zone}(${r.current_category} · ¥${r.current_price}）</span></div>
+      <div class="info-row"><span><b>排数/座位</b></span><span>${r.current_row || '-'} / ${r.current_seat || '-'}</span></div>
+      <div class="info-row"><span><b>意向分区</b></span><span style="text-align:right;max-width:60%;">${intent}</span></div>
+      <div class="info-row"><span><b>微博</b></span><span>${r.weibo_id}</span></div>
+    </div>
+
+    ${r.status === 'active' ? `
+      <button class="btn-primary" style="margin-bottom:10px;" onclick="markMatched()">✓ 我已经换成了,标记完成</button>
+    ` : `
+      <button class="btn-secondary" onclick="reactivate()">↻ 这是误判,重新上架</button>
+    `}
+  `;
+  stage.innerHTML = html;
+}
+
+async function markMatched(){
+  if(!confirm('确认标记为"已完成"吗?标记后会立刻从池子里下架,不再被别人搜到。')) return;
+  const { error } = await sb.rpc('mark_as_matched', { p_edit_token: token });
+  if(error){ alert('操作失败:' + error.message); return; }
+  load();
+}
+
+async function reactivate(){
+  const { error } = await sb.rpc('reactivate_listing', { p_edit_token: token });
+  if(error){ alert('操作失败:' + error.message); return; }
+  load();
+}
+
+load();
+</script>
+</body>
+</html>
