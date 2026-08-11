@@ -20,6 +20,15 @@
   .badge.pw{ background:var(--pink-deep); color:#fff; }
   .badge.open{ background:#e9f8ef; color:var(--green); }
   .center-link{ text-align:center; display:block; margin-top:6px; font-size:12px; color:var(--ink-soft); text-decoration:none; }
+  .reg-btn{
+    display:block; text-align:center; text-decoration:none;
+    background: linear-gradient(135deg, var(--pink-mid), var(--pink-deep)); color:#fff;
+    font-weight:800; font-size:13.5px; padding:14px 12px; border-radius:16px;
+    box-shadow: var(--shadow); margin-top:4px;
+  }
+  .reg-btn.secondary{
+    background:#fff; color: var(--pink-deep); border:1.5px solid var(--pink-deep); box-shadow:none;
+  }
 </style>
 </head>
 <body>
@@ -39,14 +48,14 @@
       <h3>博文家专属入口</h3>
       <p>浏览全部换座信息(含入口二收集的主攻/强攻数据),登记自己"非主攻→主攻/强攻"的换座需求。</p>
     </a>
-    <a class="center-link" href="register.html?entry=1">→ 博文家:登记我的非主攻换座信息(需要口令)</a>
+    <a class="reg-btn" href="register.html?entry=1">✏️ 博文家:登记我的非主攻换座信息(需要口令)</a>
 
-    <a class="portal-card" href="browse.html?mode=public" style="margin-top:10px;">
+    <a class="portal-card" href="browse.html?mode=public" style="margin-top:6px;">
       <span class="badge open">任何人都能用</span>
       <h3>对外查询</h3>
       <p>查看博文家粉丝在非主攻区、愿意换出的票信息。不需要口令,谁都能看。</p>
     </a>
-    <a class="center-link" href="register.html?entry=2">→ 登记"主攻/强攻想换到非主攻"的票信息(不需要口令)</a>
+    <a class="reg-btn secondary" href="register.html?entry=2">✏️ 登记"主攻/强攻想换到非主攻"的票信息(不需要口令)</a>
   </div>
 </div>
 </body>
