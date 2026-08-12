@@ -287,17 +287,11 @@ async function openGrid(){
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ password, show_date: showDate, category: activeCat, zone }),
     });
-    const json = await res.json().catch(() => null);
     if(res.ok){
-      const rows = json?.data || [];
-      takenSet = new Set(rows.map(d => `${d.row_number}-${d.seat_number}`));
-      alert(`[诊断] 查询成功,共查到 ${rows.length} 个已登记座位\n请求参数: show_date=${showDate}, category=${activeCat}, zone=${zone}\n返回内容: ${JSON.stringify(rows)}`);
-    } else {
-      alert(`[诊断] 查询已登记座位失败\n状态码: ${res.status}\n错误信息: ${json?.error || '(无)'}\n请求参数: show_date=${showDate}, category=${activeCat}, zone=${zone}`);
+      const json = await res.json();
+      takenSet = new Set((json.data || []).map(d => `${d.row_number}-${d.seat_number}`));
     }
-  } catch(e){
-    alert(`[诊断] 网络请求本身出错了: ${e.message}`);
-  }
+  } catch(e){ /* 拿不到已占用列表也不影响选座,只是少了灰色提示 */ }
 
   const [start, end] = window.getSeatmapRowRange(zone);
   const grid = document.getElementById('pickerGrid');
