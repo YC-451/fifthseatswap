@@ -162,7 +162,7 @@ const sb = window.getSupabaseClient();
 const params = new URLSearchParams(location.search);
 let password = sessionStorage.getItem('seatmap_pw') || null;
 // 维护开关:改成 true 就会显示"维护中",谁都进不去登记/查看;改回 false 恢复正常
-const MAINTENANCE_MODE = false;
+const MAINTENANCE_MODE = true;
 
 let showDate = null;
 let selectedZone = params.get('zone') || null;
