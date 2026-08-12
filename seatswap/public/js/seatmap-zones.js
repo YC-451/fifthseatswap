@@ -19,7 +19,7 @@ window.getSeatmapRowRange = function(zoneName){
   return [1, 40];
 };
 
-window.SEATMAP_COLS_PER_ROW = 100;
+window.SEATMAP_COLS_PER_ROW = 80;
 
 // 场馆示意布局:每个分区在场馆图上的相对位置(仿照座位划区图 + 大麦官方票价图摆的)
 // category 为 null 的是"陪衬"分区,只是为了让内场区域看起来完整,不能点、不参与登记
