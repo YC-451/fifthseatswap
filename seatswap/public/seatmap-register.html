@@ -83,14 +83,14 @@
 
     <div class="field">
       <div class="section-title"><span class="num">2</span>点场馆图选分区</div>
-      <div class="hint-box" style="margin-bottom:10px;">💡 灰色是陪衬区(不能选),深粉=强攻区,浅粉=主攻区。示意图仅表示分区大概位置,不是精确座位形状。</div>
+      <div class="hint-box" style="margin-bottom:10px;">💡 灰色为非主攻区(不能选),深粉=强攻区,浅粉=主攻区。示意图仅表示分区大概位置,不是精确座位形状。</div>
       <div class="venue-wrap">
         <div class="venue-grid" id="venueGrid"></div>
       </div>
       <div class="venue-legend">
         <span><span class="dot" style="background:var(--pink-deep);"></span>强攻区</span>
         <span><span class="dot" style="background:#ff9ec9;"></span>主攻区</span>
-        <span><span class="dot" style="background:#eee1e6;"></span>陪衬(不能选)</span>
+        <span><span class="dot" style="background:#eee1e6;"></span>非主攻(不能选)</span>
       </div>
       <div id="zoneSummary" class="seat-summary" style="margin-top:12px;">👆 请先在上面点选一个分区</div>
     </div>
@@ -162,7 +162,7 @@ const sb = window.getSupabaseClient();
 const params = new URLSearchParams(location.search);
 let password = sessionStorage.getItem('seatmap_pw') || null;
 // 维护开关:改成 true 就会显示"维护中",谁都进不去登记/查看;改回 false 恢复正常
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 let showDate = null;
 let selectedZone = params.get('zone') || null;
@@ -206,7 +206,7 @@ function onShowDateChange(){
 
 function pickZone(zoneName){
   const info = VENUE_LAYOUT[zoneName];
-  if(!info.category) return; // 陪衬区,点了没反应
+  if(!info.category) return; // 非主攻区,点了没反应
 
   selectedZone = zoneName;
   activeCat = info.category;
@@ -279,7 +279,7 @@ async function openGrid(){
   pendingCell = null;
   document.getElementById('pendingConfirm').style.display = 'none';
   document.getElementById('pickerDefaultFooter').style.display = 'flex';
-  document.getElementById('pickerZoneLabel').textContent = `${showDate} · ${activeCat} · ${zone} · 灰色格子已被登记`;
+  document.getElementById('pickerZoneLabel').textContent = `${showDate} · ${activeCat} · ${zone} · 深粉色为已登记`;
 
   let takenSet = new Set();
   try {
