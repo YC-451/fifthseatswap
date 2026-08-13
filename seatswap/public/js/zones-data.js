@@ -5,7 +5,7 @@ window.CATEGORY_DATA = [
     {name:'A3区',price:1480}, {name:'A4区',price:1480},
     {name:'二层西A3区',price:980}, {name:'二层西03区',price:980},
     {name:'二层西02区',price:680}, {name:'二层西01区',price:980}, {name:'二层北32区',price:680},
-    {name:'四层西A3区',price:980}, {name:'四层西03区',price:980},
+    {name:'四层西A3区',price:980}, {name:'四层西03区',price:680},
     {name:'四层西02区',price:680}, {name:'四层西01区',price:680}, {name:'四层北32区',price:480},
   ]},
   { name:'主攻区', color:'#f0b23e', zones:[
